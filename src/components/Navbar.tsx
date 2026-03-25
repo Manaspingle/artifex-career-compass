@@ -1,6 +1,8 @@
-import { Link, useLocation } from "react-router-dom";
-import { Briefcase, FileText, Search, LayoutDashboard } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Briefcase, FileText, Search, LayoutDashboard, LogIn, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { clearToken, getToken } from "@/lib/auth";
 
 const navItems = [
   { to: "/", label: "Home", icon: LayoutDashboard },
@@ -10,7 +12,19 @@ const navItems = [
 ];
 
 const Navbar = () => {
+  const navigate = useNavigate();
   const { pathname } = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(Boolean(getToken()));
+  }, [pathname]);
+
+  const handleLogout = () => {
+    clearToken();
+    setIsLoggedIn(false);
+    navigate("/login");
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-md">
@@ -40,6 +54,23 @@ const Navbar = () => {
               {item.label}
             </Link>
           ))}
+          {!isLoggedIn ? (
+            <Link
+              to="/login"
+              className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            >
+              <LogIn className="h-4 w-4" />
+              Login
+            </Link>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </button>
+          )}
         </div>
 
         {/* Mobile nav */}
@@ -59,6 +90,23 @@ const Navbar = () => {
               {item.label}
             </Link>
           ))}
+          {!isLoggedIn ? (
+            <Link
+              to="/login"
+              className="flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium text-muted-foreground"
+            >
+              <LogIn className="h-5 w-5" />
+              Login
+            </Link>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="flex flex-1 flex-col items-center gap-1 py-3 text-xs font-medium text-muted-foreground"
+            >
+              <LogOut className="h-5 w-5" />
+              Logout
+            </button>
+          )}
         </div>
       </div>
     </nav>
