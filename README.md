@@ -1,4 +1,4 @@
-# Created By Manas Pingle
+# <b>Created By Manas Pingle</b>
 # ARTIFEX Career Compass
 
 Full-stack job tracking and resume assistant for Indian graduates.
