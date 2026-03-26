@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import sqlite3 from "sqlite3";
 import path from "path";
 import { fileURLToPath } from "url";
+import nodemailer from "nodemailer";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +18,48 @@ app.use(cors());
 app.use(express.json());
 
 const JWT_SECRET = process.env.JWT_SECRET || "artifex-secret";
+
+// Email configuration
+const emailTransporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+const sendWelcomeEmail = async (email, name) => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log(`Welcome email not sent to ${email} - email credentials not configured`);
+    return;
+  }
+  
+  try {
+    await emailTransporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Welcome to Artifex Career Compass!",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #2563eb;">Welcome to Artifex, ${name}!</h1>
+          <p>Thank you for joining Artifex Career Compass. We're excited to help you land your dream job!</p>
+          <p>Here's what you can do with your account:</p>
+          <ul>
+            <li>Track job applications with our smart Kanban board</li>
+            <li>Get AI-powered resume analysis and suggestions</li>
+            <li>Generate personalized cover letters</li>
+            <li>Discover curated job opportunities for freshers</li>
+          </ul>
+          <p>Get started by logging in and analyzing your resume!</p>
+          <p>Best regards,<br>The Artifex Team</p>
+        </div>
+      `,
+    });
+    console.log(`Welcome email sent to ${email}`);
+  } catch (error) {
+    console.error("Error sending welcome email:", error);
+  }
+};
 
 const db = new sqlite3.Database(DB_PATH, (err) => {
   if (err) {
@@ -66,6 +109,10 @@ app.post("/api/auth/register", async (req, res) => {
       }
       const user = { id: this.lastID, name, email };
       const token = signToken(user);
+      
+      // Send welcome email (don't wait for it to complete)
+      sendWelcomeEmail(email, name);
+      
       return res.status(201).json({ user, token });
     }
   );
