@@ -6,3 +6,5 @@ Full-stack job tracking and resume assistant for Indian graduates.
 - Frontend: Vite + React + TypeScript
 - Backend: Node + Express + SQLite
 - Features: login/register, job tracker, resume analysis, remote API
+
+#Note: It is in development phase, every contribution is welcomed
